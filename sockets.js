@@ -29,7 +29,7 @@ exports.setup = function(server,tur){
           turret.fire(function(){
             socket.emit('finished-firing');
           });
-        if(data.cmd == 'PRIME'){
+        }else if(data.cmd == 'PRIME'){
           socket.emit('firing-turret');
           turret.primeFire(function(){
             socket.emit('finished-firing');
