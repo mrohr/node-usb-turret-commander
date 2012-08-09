@@ -156,4 +156,5 @@ exports.RIGHT = RIGHT;
 exports.FIRE = FIRE;
 exports.STOP = STOP;
 exports.fire = fire;
+exports.primeFire = primeFire;
 exports.send_move = send_move; 

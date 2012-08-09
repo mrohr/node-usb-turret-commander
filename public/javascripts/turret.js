@@ -12,6 +12,8 @@ $(document).ready(function(){
     }
   });
   socket.on('no-device',noTurret);
+  socket.on('connect_failed',noTurret);
+  socket.on('disconnect', noTurret);
   socket.on('firing-turret',function(){
     isFiring = true;
     drawOverlay();
@@ -51,6 +53,7 @@ $(document).ready(function(){
   keys[38] = 'UP';
   keys[39] = 'RIGHT';
   keys[40] = 'DOWN';
+  keys[80] = 'PRIME';
 
   var prevKey = undefined;
   $('body').keydown(function(e){
