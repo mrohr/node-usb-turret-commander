@@ -1,0 +1,11 @@
+extends layout
+block content
+  script(src="/socket.io/socket.io.js")
+  script(src="/javascripts/turret.js")
+  div#camera
+  div#turret
+  canvas#turret-overlay
+  video(autoplay)
+  button#resetCursor(onclick="window.resetCursor()") Reset Cursor
+  audio#control-sound(src='control.wav')
+    
