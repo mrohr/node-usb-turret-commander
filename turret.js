@@ -1,4 +1,4 @@
-var HID = require('../node-hid/build/Release/HID');
+var HID = require('node-hid');
 var DOWN    = 0x01;
 var UP      = 0x02;
 var LEFT    = 0x04;
@@ -7,8 +7,34 @@ var FIRE    = 0x10;
 var STOP    = 0x20;
 var device;
 var isMoving = false;
+var isFireing = false;
+var isPreping = false;
+
+function setup(){
+    var devices = HID.devices();
+    var path;
+    for(key in devices){
+      var dev = devices[key];
+      if(dev.product == 'USB Missile Launcher'){
+        path = dev.path;
+      }
+    }
+    console.log(path);
+    if(!path){
+      console.log('No Launcher Detected!!!');
+      process.exit();
+    }else{
+    device = new HID.HID(path);
+    }
+}
+
 function send_cmd(cmd){
     device.write([0x02, cmd, 0x00,0x00,0x00,0x00,0x00,0x00]);
+}
+function send_move(cmd){
+    if(!isFireing && !isPreping){
+      send_cmd(cmd);
+    }
 }
 
 function run_time_cmd(cmd,param,callback){
@@ -16,8 +42,6 @@ function run_time_cmd(cmd,param,callback){
   if(!param){
       param = cmd == 'shoot' ? 1 : 1000;
   }
-  console.log(cmd);
-  console.log(isMoving);
   if(cmd == 'stop'){
     isMoving = false;
     send_cmd(STOP);
@@ -61,23 +85,30 @@ function run_time_cmd(cmd,param,callback){
       break;
   }  
 }
-function setup(){
-    console.log(HID.devices());
-    var devices = HID.devices();
-    var path;
-    for(key in devices){
-      var dev = devices[key];
-      if(dev.product == 'USB Missile Launcher'){
-        path = dev.path;
-      }
+
+function primeFire(callback){
+  isPreping = true;
+  console.log('PRIME');
+  send_cmd(FIRE);
+  setTimeout(function(){
+    send_cmd(STOP);
+    isPreping = false;
+    if(callback){
+      callback();
     }
-    console.log(path);
-    if(!path){
-      console.log('No Launcher Detected!!!');
-      //process.exit();
-    }else{
-    device = new HID.HID(path);
-    }
+  },600);
+}
+
+function fire(callback){
+  if(!isFireing && !isPreping){
+    isFireing = true;
+    send_cmd(FIRE);
+    setTimeout(function(){
+      isFireing = false;
+      send_cmd(STOP);
+      primeFire(callback);
+    },3000);
+  }
 }
 function runCommandlineListener(){
     rint = require('readline').createInterface( process.stdin, {} ); 
@@ -95,10 +126,10 @@ function runCommandlineListener(){
                 send_cmd(STOP);
             }
             if( key.name == 'left' ) {
-                run_time_cmd('left',1600);
+                send_cmd(LEFT);
             }
             if( key.name == 'right' ) {
-                run_time_cmd('right',1600);
+                send_cmd(RIGHT);
             }
             if( key.name == 'up' ) {
                 send_cmd(UP);
@@ -107,7 +138,7 @@ function runCommandlineListener(){
                 send_cmd(DOWN);
             }
             if( key.name == 'space' ) {
-                send_cmd(FIRE);
+                fire();
             }
         }
     });
@@ -124,15 +155,5 @@ exports.LEFT = LEFT;
 exports.RIGHT = RIGHT;
 exports.FIRE = FIRE;
 exports.STOP = STOP;
-//setup();
-//runCommandlineListener();
-//down 1000
-/*
-run_time_cmd('left',1720,function(err){
-    if(err){
-        console.log(err);
-    }else{
-        //run_time_cmd('right',10);
-    }
-});
-*/
+exports.fire = fire;
+exports.send_move = send_move; 

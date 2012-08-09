@@ -2,6 +2,7 @@ $(document).ready(function(){
   var socket = io.connect('/');
   var mouseX;
   var mouseY;
+  var isFiring = false;
   socket.on('new-conn', function (data) {
     console.log(data);
     if(data.status == 'OK'){
@@ -11,6 +12,14 @@ $(document).ready(function(){
     }
   });
   socket.on('no-device',noTurret);
+  socket.on('firing-turret',function(){
+    isFiring = true;
+    drawOverlay();
+  });
+  socket.on('finished-firing',function(){
+    isFiring = false;
+    drawOverlay();
+  });
 
   function noTurret(){
     $('#turret').removeClass('online');
@@ -113,10 +122,12 @@ $(document).ready(function(){
     ctx.canvas.width  =canvas.width();
     ctx.canvas.height = canvas.height();
     ctx.clearRect( 0 , 0 , canvas.width() , canvas.height());
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.fillRect(0,0,300,100);
     ctx.font = "20pt Helvetica";
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = $('#camera').hasClass('online') ? 'white' : 'black';
+    ctx.fillStyle = 'black';
     ctx.fillText("Turret Commander", 5, 25);
     ctx.font = "15pt Helvetica";
     var status;
@@ -164,6 +175,13 @@ $(document).ready(function(){
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('No Camera Found', x,y);
+      }
+      if(isFiring){
+        ctx.font = "100pt Helvetica";
+        ctx.fillStyle = "red";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('FIRING', x,y);
       }
   }
 });

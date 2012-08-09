@@ -1,5 +1,5 @@
 {
-  "name": "application-name",
+  "name": "node-usb-turret-commander",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -9,6 +9,7 @@
     "express": "3.0.0rc1",
     "jade": "*",
     "stylus": "*",
-    "socket.io":"*"
+    "socket.io":"*",
+    "node-hid":"*"
   }
 }
